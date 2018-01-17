@@ -33,7 +33,6 @@
             }
         }
 
-
         public class LaserSweep : Ultimate
         {
             private const int MinimumDamage = 45;

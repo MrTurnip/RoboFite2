@@ -82,10 +82,10 @@ namespace RoboFite
             public static Random randomValue = new Random();
             private int minimumDamage, maximumDamage;
             private int burst = 1;
-            private Range Reload = new Range(1, 1);
-            private Range Ammo { get; }
+            protected Range Reload = new Range(1, 1);
+            protected Range Ammo { get; }
             protected int baseAccuracy { get; set; }
-            public override string Description => (minimumDamage + "-" + maximumDamage + " (" + Ammo.GetComparison() + ")" + " " + baseAccuracy+ "%");
+            public override string Description => (minimumDamage + "-" + maximumDamage + " (" + Ammo.GetComparison() + ")" + " " + baseAccuracy + "%");
 
             Attack TestAccuracy(Robot target)
             {
@@ -102,7 +102,7 @@ namespace RoboFite
 
                     return false;
                 }
-                
+
                 var damageRoll = randomValue.Next(minimumDamage, maximumDamage + 1);
                 var hasHit = AccuracyBeatsTargetEvasion();
                 return new Attack(damageRoll, hasHit);
@@ -110,8 +110,10 @@ namespace RoboFite
 
             public void DealDamage(Attack attack, Robot target)
             {
+                if (!attack.IsUltimate)
+                    _owner.ultimate.AddCharge(attack.Damage);
+
                 target.GetHealth.TakeDamage(attack);
-                //_owner.ultimate.c
             }
 
             private void ReloadWeapon()
@@ -202,20 +204,29 @@ namespace RoboFite
             private bool ChargeComplete => charge.Remaining >= charge.Maximum;
             public override bool IsAvailable => ChargeComplete;
 
-            public void AddCharge(int amount)
+            public override void Use(Robot target)
             {
-                charge.Remaining++;
+                EmptyCharge();
+                base.Use(target);
+            }
+
+            public void AddCharge(int amount = 1)
+            {
+                charge.Remaining += amount;
             }
 
             public void EmptyCharge()
             {
                 charge.Remaining = 0;
+                Ammo.Remaining = Ammo.Maximum;
+                Reload.Remaining = Reload.Maximum;
             }
 
             public Ultimate(Robot owner, int minDamage, int maxDamage, int burst, int ammo, int accuracy, int charge) : base(owner, minDamage, maxDamage, burst, ammo, accuracy)
             {
                 _type = Type.Ultimate;
                 this.charge = new Range(charge);
+                EmptyCharge();
             }
         }
 
@@ -333,6 +344,7 @@ namespace RoboFite
         public class Attack
         {
             public bool IsHit { get; }
+            public bool IsUltimate { get; }
             public int Damage { get; set; }
             public int TotalNegated { get; set; }
             public int TotalToVital { get; set; }

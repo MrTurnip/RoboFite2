@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -65,22 +66,35 @@ namespace RoboFite
         protected ConsoleKey GetKey() => Console.ReadKey(true).Key;
         protected char GetKeyChar() => Console.ReadKey(true).KeyChar;
 
-        public static void WriteBanner(object message, ConsoleColor background = ConsoleColor.Red, ConsoleColor foreground = ConsoleColor.Black)
+        private static void SetColors(ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.White)
         {
             Console.BackgroundColor = background;
             Console.ForegroundColor = foreground;
+        }
+
+        public static void WriteBanner(object message, ConsoleColor background = ConsoleColor.Red, ConsoleColor foreground = ConsoleColor.Black)
+        {
+            SetColors(background, foreground);
             ClearRow(0, 1);
             WriteLine(message);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
+            SetColors();
+        }
+
+        public static void WriteError(object message)
+        {
+            SetColors(ConsoleColor.Red, ConsoleColor.White);
+            ClearRow(Console.BufferHeight - 1, 1);
+            WriteLine("No.");
+            SetColors();
         }
 
         protected void ActorUseOptionOnSubject()
         {
             ResetConsoleForNextPhase();
-            WriteBanner(ActiveMember.Name + " uses " + _chosenOption.Name + " on " + _subject.Name +".");
+            WriteBanner(ActiveMember.Name + " uses " + _chosenOption.Name + " on " + _subject.Name + ".");
             _chosenOption.Use(_subject);
         }
+
 
         protected virtual void AssignSubject()
         {
@@ -88,37 +102,55 @@ namespace RoboFite
 
             WriteBanner("Choose your target. Using " + _chosenOption.Name + ".");
 
+
             foreach (var robot in _roster.allMembersList)
             {
                 if (robot.GetTeam == Robot.Team.Blue)
+                {
                     WriteLine(robot.GetProfile.Details);
+                }
             }
 
-            char input = GetKeyChar();
-
-            foreach (var robot in _roster.allMembersList)
+            bool robotFound = false;
+            do
             {
-                if (robot.GetProfile.Call == input)
-                    _subject = robot;
-            }
+                char input = GetKeyChar();
+
+                foreach (var robot in _roster.allMembersList)
+                {
+                    if (robot.GetProfile.Call == input)
+                    {
+                        _subject = robot;
+                        robotFound = true;
+                    }
+                }
+            } while (!robotFound);
         }
 
         protected void ListOptions(Robot member)
         {
             foreach (var option in member.Options)
             {
-                WriteLine(option.Details);
+                if (option.IsAvailable)
+                    WriteLine(option.Details);
             }
         }
 
         protected void AssignUsedOptionFromActiveMember()
         {
-            char keyChar = GetKeyChar();
-            foreach (var option in ActiveMember.Options)
+            bool optionFound = false;
+            do
             {
-                if (keyChar == option.Call)
-                    _chosenOption = option;
-            }
+                char keyChar = GetKeyChar();
+                foreach (var option in ActiveMember.Options)
+                {
+                    if (keyChar == option.Call && option.IsAvailable)
+                    {
+                        _chosenOption = option;
+                        optionFound = true;
+                    }
+                }
+            } while (!optionFound);
         }
 
         protected virtual void AssignOption()
