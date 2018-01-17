@@ -1,0 +1,83 @@
+﻿Goal: Get two teams of two robots to fight each other to the death.
+Specifics...
+... Pick two robots for team A; the remaining two become team B.
+... Each robot has...
+... ... 200 total HP (Vital, Armor, Shield, Shell)
+... ... One primary weapon, a secondary weapon, a special ability, and an ultimate ability.
+... ... A name and a description
+... Iterate between teams
+... ... Choose your first fighter's attack, and then his target (if the ability permits).
+... ... Choose your second fighter's attack, and so on.
+... ... Play for Team B next.
+... Attacks let you choose a target and then deal damage.
+... Healing or shields let you choose a teammate.
+
+1/3/18 - Stage 1; Team assembly. COMPLETE.
+... Player is greeted by Welcome Screen.
+... Player is taken to the Team Assembly screen.
+... Debug allows for preset team and skips to battle.
+... Player is present with four generic robots and chooses two for their Team; the others are assembled into the enemy team.
+
+1/4/18 - Stage 2; Battle Framework. COMPLETE.
+... Vitality, Armor, Shield, and Shell can be restored and depleted. 
+... Weapon system created (damage range, weapon accuracy, evasion, fire one-or-more shots, unload and reload clip)
+1/5/18
+... System automatically chooses acting robot.
+... Player chooses robot's attack.
+... Player chooses robot's target.
+... Robot is removed from battle once killed.
+
+Basic Weapons
+...   Primary -> 30 DpT
+... Secondary -> 20 DpT
+...   Ability -> Improves own ability or health.
+...  Ultimate -> Damage is equal to charge. Charge is gained by dealing damage.
+
+1/6/18 - Stage 3; Accutron: Strong against armor, weak against rapid-fire, improved accuracy
+... Base Accuracy +10%
+...    Health: 100 Vital + 25 Armor + 74 Shield + 1 Shell = 200 HP.
+...   Primary: Sniper Rifle -> 75% accuracy. 30-50 dmg. 3 rounds/clip. 1 shot/turn. 30 DpT, 90 DpC.
+1/7/18
+... Secondary: Side Pistol -> 56% accuracy. 15-25 dmg. 5 rounds/clip. 2 shots/turn. 22 DpT, 56 DpC.
+...   Ability: Generate Shell -> Adds 1x shell to HP, up to a max of 1. 
+1/8/18
+...  Ultimate: Homing Laser -> 100 Charge, targets all enemies, 100% accuracy. 45-55 dmg. 1 round. 1 shot. 50 DpT, 50 DpC.
+
+1/9/18 - Stage 4; Firestorm; Strong against shield, weak against high-damage.
+...    Health: 50 vital + 100 armor + 50 shield + 0 shell = 200 HP
+...   Primary: Flame Thrower -> 25% accuracy. 4-6 dmg. 100 rounds/clip. 25 shot/turn. 31 DpT, 156 DpC
+1/10/18
+... Secondary: Wrist Rocket -> 70% accuracy, 20-30 dmg, 3 rounds/clip, 1 shot/turn. 16 DpT,	52 DpC
+...   Ability: Fire Wall -> Raises base evasion by 50% for next turn, to a max of 50%. Cannot be used for another 3 turns.
+1/11/18
+...  Ultimate: Missile Strike -> 150 charge, targets 1x enemy, 80% accuracy, 30-35 dmg, 6 rounds, 6 shots. 156 DpT, 156 DpC.
+
+1/12/18 Stage 4; Wraith: high evasion, low armor and no shield.
+... Health: 185 Vital + 14 armor + 0 shield + 1 shell = 200 HP
+... Base Evasion: 25%
+...   Primary: Wristbow -> 65% accuracy, 20-40 dmg, 5 rounds/clip, 1 shot/turn. 19 DpT, 97 DpC
+1/13/18
+... Secondary: Throwing Knives -> 60% accuracy, 10-15 dmg, 10 rounds/clip, 2 shots/turn. 15 DpT, 75 DpC
+...   Ability: Cloaking Field -> +25 Base Evasion for next turn. 2 turns for recharge.
+1/14/18
+...  Ultimate: Ballista -> 100 charge, 80% accuracy, targets 1x enemy, 80-125 dmg, 1 round, 1 shot. 102 DpT, 102 DpC.
+
+1/15/18 Stage 5; Behemoth: High armor, high damage, low ammo, low evasion
+... Health: 25 Vital + 100 armor + 70 Shield + 5 Shell = 200 HP
+... Secondary not accessible by default; switch to access.
+...   Primary: Cannon -> 50% accuracy, 80-100 dmg, 1 round/clip, 1 round/turn. 45 DpT, 45 DpC
+1/16/18
+... Secondary: Machinegun -> 15% accuracy, 5-10 dmg, 50 round/clip, 20 round/turn. 22 DpT, 56 DpC.
+...   Ability: Switch Weapon -> Replace Cannon with Machinegun, or Machinegun with Cannon.
+1/17/18
+...  Ultimate: Railgun -> 200 charge, 80% accuracy, targets 1x enemy. 175-225 dmg, 1 round, 1 shot, 200 DpT, 200 DpC
+
+1/18/18 Stage 6; Winning the Game
+... When a team is wiped out the game is won.
+... Final debugs - retrying prompts.
+... Close window after battle stats shown.
+
+ 1/20/18 Stage 7; Release
+
+ NOTE
+ should take about 17 days total to complete. Good time!
