@@ -16,9 +16,9 @@ namespace RoboFite
             }
         }
 
-        protected virtual void Update()
+        protected virtual CombatResults Update()
         {
-
+            return new CombatResults();
         }
 
         protected void Write(object message, Coordinates coordinates)
@@ -31,9 +31,9 @@ namespace RoboFite
         protected ConsoleKey GetKey() => Console.ReadKey().Key;
         protected void ClearConsole() => Console.Clear();
 
-        public void Execute()
+        public CombatResults Execute()
         {
-            Update();
+            return Update();
         }
     }
 }

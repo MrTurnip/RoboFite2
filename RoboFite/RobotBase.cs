@@ -8,18 +8,19 @@ namespace RoboFite
     {
         public enum Team
         {
-            Red, Blue
+            Red, Blue, None
         }
-        // Options already has actor (is the actor).
-        // Already has option info (is the option).
-        // Needs to know who it can target...
-        // Gets the Roster.
-
+        
         public class Option
         {
             public enum Type
             {
                 Ability, Weapon, Ultimate
+            }
+            
+            public enum Targeting
+            {
+                Enemy, Self
             }
 
             protected Robot _owner;
@@ -27,6 +28,8 @@ namespace RoboFite
             protected char _call;
             protected Type _type;
             public Type GetType => _type;
+            public Targeting GetTargeting { get; set; } = Targeting.Enemy;
+
 
             public virtual bool IsAvailable { get; } = true;
 
@@ -51,11 +54,11 @@ namespace RoboFite
 
         public class OptionsList : List<Option>
         {
-            private TeamRoster _fullRoster;
+            public TeamRoster FullRoster { get; }
 
             public OptionsList(TeamRoster fullRoster) : base()
             {
-                _fullRoster = fullRoster;
+                FullRoster = fullRoster;
             }
         }
 
@@ -64,11 +67,21 @@ namespace RoboFite
             private string _name, _description;
             private char _call;
 
-            public string Name => _name;
-            public string Description => _description;
-            public char Call => _call;
-            public string Details => ("(" + Call + ") " + Name + " - " + Description);
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }
 
+            public string Description => _description;
+            public char Call
+            {
+                get => _call;
+                set => _call = value;
+            }
+
+            public string Details => ("(" + Call + ") " + Name + " - " + Description);
+            
             public Profile(string name, string description, char call)
             {
                 _name = name;
@@ -148,7 +161,7 @@ namespace RoboFite
                 Console.ReadKey(true);
             }
 
-            private void FireAtTarget(Robot target)
+            protected void FireAtTarget(Robot target)
             {
                 Attack attack = TestAccuracy(target);
                 if (attack.IsHit)
@@ -181,6 +194,7 @@ namespace RoboFite
             public Ability(Robot owner) : base(owner)
             {
                 _type = Type.Ability;
+                GetTargeting = Targeting.Self;
             }
         }
 
@@ -220,13 +234,14 @@ namespace RoboFite
                 charge.Remaining = 0;
                 Ammo.Remaining = Ammo.Maximum;
                 Reload.Remaining = Reload.Maximum;
+                
             }
 
             public Ultimate(Robot owner, int minDamage, int maxDamage, int burst, int ammo, int accuracy, int charge) : base(owner, minDamage, maxDamage, burst, ammo, accuracy)
             {
                 _type = Type.Ultimate;
                 this.charge = new Range(charge);
-                EmptyCharge();
+                //EmptyCharge();
             }
         }
 
@@ -263,6 +278,8 @@ namespace RoboFite
             public Range Total => Vital + Armor + Shield + Shell;
             public int Remaining => Total.Remaining;
             public int Maximum => Total.Maximum;
+            public bool IsDefeated => Remaining <= 0;
+            public int TurnsWithoutDamage { get; set; }
 
             public void ListHealthBlocks()
             {
@@ -275,6 +292,15 @@ namespace RoboFite
                 WriteToConsole("Shield: " + Shield.GetComparison());
                 WriteToConsole("Armor: " + Armor.GetComparison());
                 WriteToConsole("Vital: " + Vital.GetComparison());
+            }
+
+            public void ReduceToInstakill()
+            {
+                Vital.Remaining = 1;
+                Armor.Remaining = 0;
+                Shield.Remaining = 0;
+                Shell.Remaining = 0;
+
             }
 
             Attack PassDamageThroughShell(Attack attack)
@@ -382,6 +408,7 @@ namespace RoboFite
         protected Secondary secondary;
         protected Ability ability;
         protected Ultimate ultimate;
+        public bool hasTakenTurn = false;
 
         public Robot(TeamRoster teamRoster, Team team)
         {

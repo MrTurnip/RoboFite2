@@ -62,16 +62,7 @@ namespace RoboFite
         public Team RedTeam => redTeam;
         public Team BlueTeam => blueTeam;
 
-        public List<Robot> allMembersList
-        {
-            get
-            {
-                var fullList = new List<Robot>();
-                fullList.AddRange(redTeam.Members);
-                fullList.AddRange(blueTeam.Members);
-                return fullList;
-            }
-        }
+        public List<Robot> AllRobots = new List<Robot>();
 
         public TeamRoster()
         {
@@ -103,8 +94,15 @@ namespace RoboFite
 
             public void LaunchLoop()
             {
-                while (!_isFinishedLooping)
-                    _scene.Execute();
+                CombatResults results = new CombatResults();
+                do
+                {
+                    results = _scene.Execute();
+                } while (results.Winner == Robot.Team.None);
+
+                Console.Clear();
+                Console.WriteLine(results.Winner + " team won.");
+                Console.ReadKey(true);
             }
 
             public ActiveScene(Scene startingScene)
@@ -123,16 +121,17 @@ namespace RoboFite
             _teamRoster = new TeamRoster();
             _robotStorage = new RobotStorage(_teamRoster);
 
-            
+
             switch (teamPreset)
             {
-                case 2: _combat = new CombatPresetTeamsA(_teamRoster);
+                case 2:
+                    _combat = new CombatPresetTeamsA(_teamRoster);
                     break;
                 default: _combat = new Combat(_teamRoster); break;
             }
-            
+
             _activeScene = new ActiveScene(_combat);
-            
+
             _activeScene.LaunchLoop();
 
         }

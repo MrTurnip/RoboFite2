@@ -1,4 +1,7 @@
-﻿namespace RoboFite
+﻿using System;
+using System.Collections.Generic;
+
+namespace RoboFite
 {
     public class Accutron : Robot
     {
@@ -24,9 +27,18 @@
             }
         }
 
-        public class ShieldGenerator : Ability
+        public class ShellGenerator : Ability
         {
-            public ShieldGenerator(Robot owner) : base(owner)
+            public override void Use(Robot target)
+            {
+                Console.WriteLine("Restoring Shell.");
+                _owner.GetHealth.Shell.Remaining = 1;
+                _owner.GetHealth.ListHealthBlocks();
+
+                Console.ReadKey(true);
+            }
+
+            public ShellGenerator(Robot owner) : base(owner)
             {
                 _call = 's';
                 _name = "Shield Generator";
@@ -35,6 +47,26 @@
 
         public class LaserSweep : Ultimate
         {
+            private void DamageTarget(Robot target)
+            {
+                FireAtTarget(target);
+            }
+
+            public override void Use(Robot target)
+            {
+                List<Robot> allRobots = _owner.Options.FullRoster.AllRobots;
+                foreach (Robot robot in allRobots)
+                {
+                    if (robot.GetTeam != _owner.GetTeam)
+                    {
+                        DamageTarget(robot);
+                        robot.GetHealth.ListHealthBlocks();
+                    }
+                }
+
+                Console.ReadKey(true);
+            }
+
             private const int MinimumDamage = 45;
             private const int MaximumDamage = 55;
             public LaserSweep(Robot owner) : base(owner, MinimumDamage, MaximumDamage, 1, 1, 100, 100)
@@ -50,7 +82,7 @@
 
             primary = new Rifle(this);
             secondary = new Pistol(this);
-            ability = new ShieldGenerator(this);
+            ability = new ShellGenerator(this);
             ultimate = new LaserSweep(this);
 
             _options.Add(primary);

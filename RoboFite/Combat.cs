@@ -26,9 +26,11 @@ namespace RoboFite
         protected Robot _actor, _subject;
         protected Robot.Option _chosenOption;
         protected TeamRoster _roster;
-        protected Team ActiveTeam;
-        private int _memberIndex = 0;
-        protected Robot ActiveMember => ActiveTeam.GetMember(_memberIndex);
+        protected Robot.Team ActiveTeam;
+        protected int _memberIndex = 0;
+        protected Robot ActiveMember;
+        protected bool TeamHasTakenTurn = false;
+        public static Robot.Team winningTeam = Robot.Team.None;
 
         protected readonly Scene.Coordinates PrintCoordinates;
 
@@ -95,6 +97,7 @@ namespace RoboFite
             _chosenOption.Use(_subject);
         }
 
+        //TODO have team displays switch when user targets.
 
         protected virtual void AssignSubject()
         {
@@ -102,23 +105,28 @@ namespace RoboFite
 
             WriteBanner("Choose your target. Using " + _chosenOption.Name + ".");
 
-
-            foreach (var robot in _roster.allMembersList)
+            foreach (var robot in _roster.AllRobots)
             {
-                if (robot.GetTeam == Robot.Team.Blue)
+                if (robot.GetTeam != ActiveTeam && !robot.GetHealth.IsDefeated)
                 {
-                    WriteLine(robot.GetProfile.Details);
+                    WriteLine(robot.GetProfile.Details + " " + robot.GetHealth.Total.GetComparison());
                 }
             }
 
             bool robotFound = false;
             do
             {
+                if (_chosenOption.GetTargeting == Robot.Option.Targeting.Self)
+                {
+                    _subject = ActiveMember;
+                    break;
+                }
+
                 char input = GetKeyChar();
 
-                foreach (var robot in _roster.allMembersList)
+                foreach (var robot in _roster.AllRobots)
                 {
-                    if (robot.GetProfile.Call == input)
+                    if (robot.GetProfile.Call == input && !robot.GetHealth.IsDefeated)
                     {
                         _subject = robot;
                         robotFound = true;
@@ -156,14 +164,20 @@ namespace RoboFite
         protected virtual void AssignOption()
         {
             ResetConsoleForNextPhase();
-            WriteBanner(ActiveTeam.Name + "'s turn. " + ActiveMember.Name + " is awaiting orders.");
+            WriteBanner(ActiveTeam + "'s turn. " + ActiveMember.Name + "(" + ActiveMember.GetHealth.Total.GetComparison() + ")" + " is awaiting orders.");
             ListOptions(ActiveMember);
             AssignUsedOptionFromActiveMember();
         }
 
-        protected virtual void AssignActor()
+        protected virtual void AssignActor(Robot target)
         {
-            // Actor is automatically assigned.
+            ActiveMember = target;
+            ActiveTeam = ActiveMember.GetTeam;
+        }
+
+        protected void ToggleActiveTeam()
+        {
+            ActiveTeam = ActiveTeam == Robot.Team.Red ? Robot.Team.Blue : Robot.Team.Red;
         }
 
         public CombatTurn(TeamRoster roster, Scene.Coordinates printCoordinates)
@@ -173,23 +187,49 @@ namespace RoboFite
         }
     }
 
-
     public class RedTeamCombatTurn : CombatTurn
     {
-        public override void Take()
+        public void RobotTakeTurn(Robot target)
         {
-            Console.Write("Red Team active.");
-            AssignActor();
+            if (target.GetHealth.IsDefeated)
+                return;
+
+            AssignActor(target);
             AssignOption();
             AssignSubject();
-
             ActorUseOptionOnSubject();
+
+            int redDefeated = 0;
+            int blueDefeated = 0;
+            foreach (Robot robot in _roster.AllRobots)
+            {
+                if (robot.GetTeam == Robot.Team.Blue && robot.GetHealth.IsDefeated)
+                    blueDefeated++;
+                if (blueDefeated == 2)
+                {
+                    winningTeam = Robot.Team.Red;
+                }
+
+                if (robot.GetTeam == Robot.Team.Red && robot.GetHealth.IsDefeated)
+                    redDefeated++;
+                if (redDefeated == 2)
+                {
+                    winningTeam = Robot.Team.Blue;
+                }
+
+            }
         }
 
         public RedTeamCombatTurn(TeamRoster roster) : base(roster, new Scene.Coordinates(0, 1))
         {
-            ActiveTeam = roster.RedTeam;
+
         }
+    }
+
+    public class CombatResults
+    {
+        public Robot.Team Winner { get; set; } = Robot.Team.None;
+        public Robot.Team Loser { get; set; } = Robot.Team.None;
     }
 
     public class Combat : Scene
@@ -197,10 +237,21 @@ namespace RoboFite
         protected TeamRoster _teamRoster;
         protected RedTeamCombatTurn _redTeamTurn, _blueTeamTurn;
 
-        protected override void Update()
+        protected override CombatResults Update()
         {
-            _redTeamTurn.Take();
-            _blueTeamTurn.Take();
+            CombatResults results = new CombatResults();
+
+            foreach (Robot robot in _teamRoster.AllRobots)
+            {
+                _redTeamTurn.RobotTakeTurn(robot);
+                if (CombatTurn.winningTeam != Robot.Team.None)
+                {
+                    results.Winner = CombatTurn.winningTeam;
+                    break;
+                }
+            }
+
+            return results;
         }
 
         public Combat(TeamRoster teamRoster) : base()
@@ -221,12 +272,23 @@ namespace RoboFite
             var accutronC = new Accutron(teamRoster, Robot.Team.Blue);
             var accutronD = new Accutron(teamRoster, Robot.Team.Blue);
 
-            Team redTeam = teamRoster.RedTeam;
-            redTeam.AddMember(accutronA);
-            redTeam.AddMember(accutronB);
-            Team blueTeam = teamRoster.BlueTeam;
-            blueTeam.AddMember(accutronC);
-            blueTeam.AddMember(accutronD);
+            accutronA.GetProfile.Name = "Accutron A";
+            accutronA.GetProfile.Call = 'a';
+            accutronA.GetHealth.ReduceToInstakill();
+            accutronB.GetProfile.Name = "Accutron B";
+            accutronB.GetProfile.Call = 'b';
+            accutronB.GetHealth.ReduceToInstakill();
+            accutronC.GetProfile.Name = "Accutron C";
+            accutronC.GetProfile.Call = 'c';
+            accutronC.GetHealth.ReduceToInstakill();
+            accutronD.GetProfile.Name = "Accutron D";
+            accutronD.GetProfile.Call = 'd';
+            accutronD.GetHealth.ReduceToInstakill();
+
+            _teamRoster.AllRobots.Add(accutronA);
+            _teamRoster.AllRobots.Add(accutronB);
+            _teamRoster.AllRobots.Add(accutronC);
+            _teamRoster.AllRobots.Add(accutronD);
         }
     }
 }
