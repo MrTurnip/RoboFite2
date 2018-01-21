@@ -274,16 +274,16 @@ namespace RoboFite
 
             accutronA.GetProfile.Name = "Accutron A";
             accutronA.GetProfile.Call = 'a';
-            accutronA.GetHealth.ReduceToInstakill();
+            //accutronA.GetHealth.ReduceToInstakill();
             accutronB.GetProfile.Name = "Accutron B";
             accutronB.GetProfile.Call = 'b';
-            accutronB.GetHealth.ReduceToInstakill();
+           // accutronB.GetHealth.ReduceToInstakill();
             accutronC.GetProfile.Name = "Accutron C";
             accutronC.GetProfile.Call = 'c';
-            accutronC.GetHealth.ReduceToInstakill();
+          //  accutronC.GetHealth.ReduceToInstakill();
             accutronD.GetProfile.Name = "Accutron D";
             accutronD.GetProfile.Call = 'd';
-            accutronD.GetHealth.ReduceToInstakill();
+            //accutronD.GetHealth.ReduceToInstakill();
 
             _teamRoster.AllRobots.Add(accutronA);
             _teamRoster.AllRobots.Add(accutronB);

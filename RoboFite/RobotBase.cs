@@ -234,14 +234,13 @@ namespace RoboFite
                 charge.Remaining = 0;
                 Ammo.Remaining = Ammo.Maximum;
                 Reload.Remaining = Reload.Maximum;
-                
             }
 
             public Ultimate(Robot owner, int minDamage, int maxDamage, int burst, int ammo, int accuracy, int charge) : base(owner, minDamage, maxDamage, burst, ammo, accuracy)
             {
                 _type = Type.Ultimate;
                 this.charge = new Range(charge);
-                //EmptyCharge();
+                EmptyCharge();
             }
         }
 
@@ -362,7 +361,7 @@ namespace RoboFite
             {
                 Vital = new Range(150);
                 Armor = new Range(25);
-                Shield = new Range(25);
+                Shield = new Range(24);
                 Shell = new Range(1);
             }
         }
